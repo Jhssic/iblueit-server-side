@@ -1,3 +1,7 @@
+# Python (report-ai)
+report-ai/venv
+report-ai/__pycache__
+
 # Logs
 logs
 *.log
