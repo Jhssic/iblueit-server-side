@@ -2,6 +2,9 @@
 report-ai/venv
 report-ai/__pycache__
 
+# Scripts de conveniência local
+run-backend.sh
+
 # Logs
 logs
 *.log
