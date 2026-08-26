@@ -9,6 +9,7 @@ resposta — nenhuma outra camada do sistema precisa mudar.
 """
 
 import os
+from datetime import datetime
 
 AVISO_REVISAO = (
     "Este relatório foi gerado automaticamente por IA e deve ser revisado "
@@ -47,10 +48,21 @@ def _trend_word(diff):
     return "estabilidade"
 
 
+def _format_date(iso_str):
+    if not iso_str:
+        return "—"
+    try:
+        return datetime.fromisoformat(iso_str.replace("Z", "+00:00")).strftime("%d/%m/%Y")
+    except ValueError:
+        return iso_str
+
+
 def _build_resumo(device, period, session_count, current_metrics):
     sessao_txt = "sessão" if session_count == 1 else "sessões"
+    periodo_inicio = _format_date(period.get("start"))
+    periodo_fim = _format_date(period.get("end"))
     partes = [
-        f"No período de {period.get('start', '—')} a {period.get('end', '—')}, "
+        f"No período de {periodo_inicio} a {periodo_fim}, "
         f"o paciente realizou {session_count} {sessao_txt} de reabilitação respiratória "
         f"utilizando o dispositivo {device}."
     ]
@@ -111,7 +123,7 @@ def _build_dados_brutos(current_metrics, metric_sources):
             "sigla": key,
             "valor": valor,
             "unidade": unidade,
-            "collection": metric_sources.get(key, "—"),
+            "sourceCollection": metric_sources.get(key, "—"),
         })
     return linhas
 

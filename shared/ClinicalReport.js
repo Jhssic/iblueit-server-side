@@ -20,7 +20,7 @@ const ClinicalReportSchema = mongoose.Schema({
         sigla: { type: String },
         valor: { type: mongoose.Schema.Types.Mixed },
         unidade: { type: String },
-        collection: { type: String },
+        sourceCollection: { type: String },
     }],
     generatedBy: { type: String },
     alerts: [{

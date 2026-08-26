@@ -99,3 +99,6 @@ bin
 obj
 appsettings.json
 local.settings.json
+
+# Dumps locais de exportação de dados (não versionar)
+export-patient-data.json
