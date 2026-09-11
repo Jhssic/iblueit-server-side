@@ -5,7 +5,7 @@ const AlertRecordSchema = mongoose.Schema({
     clinicalReportId: { type: mongoose.Schema.Types.ObjectId, ref: 'ClinicalReport' },
     metric: { type: String },
     condition: { type: String },
-    consecutiveSessions: { type: Number },
+    triggerValue: { type: Number },
     active: { type: Boolean, default: true },
 },
     { timestamps: { createdAt: 'triggered_at' } }

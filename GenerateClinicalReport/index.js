@@ -21,6 +21,7 @@ module.exports = async function (context, req) {
     const utils = require('../shared/utils');
     const validations = require('../shared/Validators');
     const clinicalMetrics = require('../shared/clinicalMetrics');
+    const { evaluateAlerts } = require('../shared/alertEvaluation');
 
     // --- Autenticação (gameToken) ---
     const isVerifiedGameToken = await utils.verifyGameToken(req.headers.gametoken, mongoose);
@@ -150,8 +151,8 @@ module.exports = async function (context, req) {
             return;
         }
 
-        // --- RF09/RN04: alerta por deterioração consecutiva (critério padrão: DJ, 5 sessões) ---
-        const alertsTriggered = await checkDefaultAlert(pacientId, PlataformOverviewModel);
+        // --- RF09/RF10/RN04: avalia critérios configurados (ou o padrão, se nenhum existir) ---
+        const alertsTriggered = await evaluateAlerts(pacientId, mongoose);
 
         const savedReport = await new ClinicalReportModel({
             pacientId,
@@ -179,7 +180,7 @@ module.exports = async function (context, req) {
                 clinicalReportId: savedReport._id,
                 metric: alert.metric,
                 condition: alert.condition,
-                consecutiveSessions: alert.consecutiveSessions,
+                triggerValue: alert.triggerValue,
             }).save();
         }
 
@@ -194,30 +195,3 @@ module.exports = async function (context, req) {
 
     context.done();
 };
-
-// Critério padrão de alerta (RN04): 5 sessões consecutivas de queda em DJ (scoreRatio).
-// TODO: substituir por critérios configuráveis por paciente (RF10) quando essa tela existir.
-async function checkDefaultAlert(pacientId, PlataformOverviewModel) {
-    const DEFAULT_CONSECUTIVE = 5;
-    const lastSessions = await PlataformOverviewModel
-        .find({ pacientId })
-        .sort({ created_at: -1 })
-        .limit(DEFAULT_CONSECUTIVE);
-
-    if (lastSessions.length < DEFAULT_CONSECUTIVE) return [];
-
-    const chronological = lastSessions.slice().reverse();
-    let consecutiveDrops = 0;
-    for (let i = 1; i < chronological.length; i++) {
-        if (chronological[i].scoreRatio < chronological[i - 1].scoreRatio) {
-            consecutiveDrops++;
-        } else {
-            consecutiveDrops = 0;
-        }
-    }
-
-    if (consecutiveDrops >= DEFAULT_CONSECUTIVE - 1) {
-        return [{ metric: "DJ", condition: "Deterioração consecutiva", consecutiveSessions: DEFAULT_CONSECUTIVE }];
-    }
-    return [];
-}

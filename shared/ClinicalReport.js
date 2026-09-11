@@ -26,7 +26,7 @@ const ClinicalReportSchema = mongoose.Schema({
     alerts: [{
         metric: { type: String },
         condition: { type: String },
-        consecutiveSessions: { type: Number },
+        triggerValue: { type: Number },
     }],
     archived: { type: Boolean, default: false },
     generatedByUserId: { type: String },
