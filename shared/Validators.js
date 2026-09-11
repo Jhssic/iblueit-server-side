@@ -204,3 +204,18 @@ exports.generateClinicalReportValidator = (generateClinicalReportReq) => {
 
     return validation;
 }
+
+exports.saveAlertCriteriaValidator = (saveAlertCriteriaReq) => {
+
+    let rules = {
+        criteria: 'array',
+        'criteria.*.metric': ['required', { 'in': ['DJ', 'PJ', 'EB'] }],
+        'criteria.*.condition': ['required', { 'in': ['Deterioração consecutiva', 'Queda percentual >'] }],
+        'criteria.*.triggerValue': 'required|numeric',
+    };
+
+    let validation = new Validator(saveAlertCriteriaReq, rules);
+    validation.check();
+
+    return validation;
+}
